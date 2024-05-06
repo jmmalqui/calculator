@@ -1,2 +1,2 @@
 # Calculator
-![preview](img/screenshot.png)
+!["preview"](img/screenshot.png)
