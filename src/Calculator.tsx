@@ -40,7 +40,7 @@ export default function Calculator(props: any) {
                 setMathExpression(newValue);
                 props.onExpressionHistory([...savedExpressions]);
             } catch (err: unknown) {
-                setSyntaxError("ERROR");
+                setSyntaxError("Something went wrong");
             }
         } else {
             newValue = mathExpression + e.target.value;
@@ -57,7 +57,7 @@ export default function Calculator(props: any) {
         <>
             <div className="w-[40%] h-full bg-slate-600 flex flex-col gap-3 p-2">
                 <div className="h-[20%] bg-slate-900 rounded-lg flex flex-col align-middle  overflow-y-scroll shadow-lg shadow-slate-900">
-                    <div className="bg-red-500 text-white text-center">
+                    <div className="bg-red-500 text-white text-center font-bold">
                         {syntaxError}
                     </div>
                     <div className="text-slate-400 text-2xl text-left m-2 transition ease-in-out duration-150 ">
