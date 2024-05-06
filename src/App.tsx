@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Calculator from "./Calculator";
 import History from "./History";
 
@@ -6,10 +6,6 @@ function App() {
     const [exprHistory, setExpressionHistory] = useState([]);
     const [currentEntry, setCurrentEntry] = useState({});
 
-    useEffect(
-        () => console.log("data has changed somewhere", currentEntry),
-        [currentEntry]
-    );
     return (
         <>
             <div className=" bg-slate-600  min-h-screen place-items-center grid">

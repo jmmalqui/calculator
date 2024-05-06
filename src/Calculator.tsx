@@ -5,9 +5,9 @@ let savedExpressions: Array<any> = [];
 export default function Calculator(props: any) {
     const [mathExpression, setMathExpression] = useState("");
     const [oldMathExpr, setOldMathExpr] = useState("");
-
+    const [syntaxError, setSyntaxError] = useState("");
     useEffect(() => {
-        if (props.entryFromHistory.result == undefined) {
+        if (props.entryFromHistory.result === undefined) {
             return;
         }
         setMathExpression(props.entryFromHistory.result);
@@ -23,27 +23,43 @@ export default function Calculator(props: any) {
     function handleExpressionChange(e: any) {
         let newValue;
         if (e.target.value == "=") {
-            newValue = math.evaluate(mathExpression.toString());
-            setOldMathExpr(mathExpression);
-            savedExpressions.push({
-                expression: mathExpression,
-                result: newValue,
-            });
-            props.onExpressionHistory([...savedExpressions]);
+            if (
+                mathExpression.toString().length == 0 ||
+                mathExpression === "sqrt"
+            ) {
+                return;
+            }
+            try {
+                newValue = math.evaluate(mathExpression.toString());
+                setSyntaxError("");
+                setOldMathExpr(mathExpression);
+                savedExpressions.push({
+                    expression: mathExpression,
+                    result: newValue,
+                });
+                setMathExpression(newValue);
+                props.onExpressionHistory([...savedExpressions]);
+            } catch (err: unknown) {
+                setSyntaxError("ERROR");
+            }
         } else {
             newValue = mathExpression + e.target.value;
+            setMathExpression(newValue);
         }
-        setMathExpression(newValue);
     }
     function deleteExpression() {
         setMathExpression("");
         setOldMathExpr("");
+        setSyntaxError("");
     }
 
     return (
         <>
             <div className="w-[40%] h-full bg-slate-600 flex flex-col gap-3 p-2">
                 <div className="h-[20%] bg-slate-900 rounded-lg flex flex-col align-middle  overflow-y-scroll shadow-lg shadow-slate-900">
+                    <div className="bg-red-500 text-white text-center">
+                        {syntaxError}
+                    </div>
                     <div className="text-slate-400 text-2xl text-left m-2 transition ease-in-out duration-150 ">
                         {" "}
                         {oldMathExpr}
