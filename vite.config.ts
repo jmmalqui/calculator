@@ -9,5 +9,5 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src"),
         },
     },
-    base: "https://jmmalqui.github.io/calculator/",
+    base: "/calculator/",
 });
