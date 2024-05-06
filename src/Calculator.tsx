@@ -35,7 +35,7 @@ export default function Calculator(props: any) {
         }
         setMathExpression(newValue);
     }
-    function deleteExpression(e: any) {
+    function deleteExpression() {
         setMathExpression("");
         setOldMathExpr("");
     }

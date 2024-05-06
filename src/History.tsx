@@ -2,7 +2,7 @@ export default function History(props: any) {
     function onEntryClick(e: any) {
         props.onCurrentEntry(props.expressionHistory[e.target.id]);
     }
-    function deleteHistory(e: any) {
+    function deleteHistory() {
         props.onExpressionHistory([]);
     }
     return (
