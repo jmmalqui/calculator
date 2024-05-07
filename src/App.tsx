@@ -8,7 +8,7 @@ function App() {
 
     return (
         <>
-            <div className=" bg-slate-600  min-h-screen place-items-center grid">
+            <div className=" bg-slate-600  min-h-screen place-items-center grid relative">
                 <div className="flex flex-row h-[60vh] w-[60vw]">
                     <Calculator
                         onExpressionHistory={setExpressionHistory}

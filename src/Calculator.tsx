@@ -1,11 +1,24 @@
 import * as math from "mathjs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 let savedExpressions: Array<any> = [];
+
+function insertStringAtIndex(
+    target: string,
+    string: string,
+    idx: number
+): string {
+    return target.slice(0, idx) + string + target.slice(idx);
+}
+
 export default function Calculator(props: any) {
     const [mathExpression, setMathExpression] = useState("");
     const [oldMathExpr, setOldMathExpr] = useState("");
     const [syntaxError, setSyntaxError] = useState("");
+    const [requestCalculation, setRequestCalculation] = useState(false);
+    const [caretPosition, setCaretPosition] = useState(0);
+    const inputRef = useRef<any>(null);
+
     useEffect(() => {
         if (props.entryFromHistory.result === undefined) {
             return;
@@ -20,8 +33,23 @@ export default function Calculator(props: any) {
         }
     }, [props.expressionHistory]);
 
+    function evaluateExpression() {
+        try {
+            let newValue = math.evaluate(mathExpression.toString());
+            setSyntaxError("");
+            setOldMathExpr(mathExpression);
+            savedExpressions.push({
+                expression: mathExpression,
+                result: newValue,
+            });
+            setMathExpression(newValue);
+            props.onExpressionHistory([...savedExpressions]);
+        } catch (err: unknown) {
+            setSyntaxError("Something went wrong");
+        }
+    }
+
     function handleExpressionChange(e: any) {
-        let newValue;
         if (e.target.value == "=") {
             if (
                 mathExpression.toString().length == 0 ||
@@ -29,29 +57,52 @@ export default function Calculator(props: any) {
             ) {
                 return;
             }
-            try {
-                newValue = math.evaluate(mathExpression.toString());
-                setSyntaxError("");
-                setOldMathExpr(mathExpression);
-                savedExpressions.push({
-                    expression: mathExpression,
-                    result: newValue,
-                });
-                setMathExpression(newValue);
-                props.onExpressionHistory([...savedExpressions]);
-            } catch (err: unknown) {
-                setSyntaxError("Something went wrong");
-            }
+            evaluateExpression();
         } else {
-            newValue = mathExpression + e.target.value;
+            setCaretPosition(caretPosition + e.target.value.length);
+            let newValue = insertStringAtIndex(
+                mathExpression,
+                e.target.value,
+                caretPosition
+            );
             setMathExpression(newValue);
+            if (inputRef.current) {
+                inputRef.current.value = newValue;
+            }
         }
     }
     function deleteExpression() {
+        if (inputRef.current) {
+            inputRef.current.value = "";
+        }
+        setCaretPosition(0);
         setMathExpression("");
         setOldMathExpr("");
         setSyntaxError("");
     }
+    function onKeyboardTextInput(e: any) {
+        if (e.key === "Enter") {
+            setMathExpression(e.target.value);
+            setRequestCalculation(true);
+        } else {
+            setCaretPosition(e.target.selectionStart + 1);
+        }
+    }
+
+    function onClickCursorChange(e: any) {
+        setCaretPosition(e.target.selectionStart);
+    }
+
+    useEffect(() => {
+        if (mathExpression.length == 0) {
+            return;
+        }
+        if (requestCalculation == false) {
+            return;
+        }
+        evaluateExpression();
+        setRequestCalculation(false);
+    }, [requestCalculation]);
 
     return (
         <>
@@ -64,9 +115,21 @@ export default function Calculator(props: any) {
                         {" "}
                         {oldMathExpr}
                     </div>
-                    <div className="text-white text-4xl text-right m-2">
-                        {mathExpression}{" "}
-                    </div>
+                    <input
+                        ref={inputRef}
+                        className="text-white text-4xl text-right m-2 bg-slate-900 outline-none"
+                        onKeyDown={(e) => {
+                            onKeyboardTextInput(e);
+                        }}
+                        tabIndex={0}
+                        autoFocus
+                        onClick={(e) => {
+                            onClickCursorChange(e);
+                        }}
+                        onChange={(e) => {
+                            setMathExpression(e.target.value);
+                        }}
+                    />
                 </div>
                 <div className="h-[80%] grid grid-rows-5 gap-2 grid-cols-5 items-stretch active:*:shadow-lg active:*:shadow-slate-900 *:overflow-hidden *:text-3xl  *:duration-300 *:ease-in-out active:*:scale-90">
                     <button
@@ -175,7 +238,8 @@ export default function Calculator(props: any) {
                         className=" bg-blue-500 rounded-lg text-white text-xl font-bold"
                     >
                         {" "}
-                        {"x2"}
+                        {"x"}
+                        <sup>2</sup>
                     </button>
                     <button
                         value="1"
